@@ -1,2 +1,2 @@
-# sehw
+# Software Engineering
 Homework 02
