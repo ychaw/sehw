@@ -41,7 +41,10 @@ class PythonOrgSearch(unittest.TestCase):
 
         # find the text input and replace abc with column
         
+        # this sometimes misses the first two inputs, make the selector more explicit
+
         for i in range(1, 5):
+            
             css_selector = "div:nth-child(§) .form-field:nth-child(2) > .input".replace("§", str(i))
             field = driver.find_element(By.CSS_SELECTOR, css_selector)
             field.clear()
@@ -49,14 +52,10 @@ class PythonOrgSearch(unittest.TestCase):
             updatedText = driver.find_element(By.CSS_SELECTOR, css_selector).get_attribute("value")
             self.assertIn('column_', updatedText) # check if changing the text worked
             self.assertNotIn('abc', updatedText)
+        
+        # find and click export button
 
-        # find the export button
-        
-        # I copied this path out of the page with devtools, but it also doesn't work, 
-        # so there must be another issue somewhere
-        # exportButton = driver.find_element_by_xpath("/html/body/div/div/div[2]/header/div[3]/button")
-        
-        exportButton = driver.find_element_by_xpath("//div[@class='text-right']/button") # doesn't find the element
+        exportButton = driver.find_element_by_xpath("//div[@class='text-right']/button")
         exportButton.click()
 
         # wait until the export window is open and visible
@@ -78,9 +77,26 @@ class PythonOrgSearch(unittest.TestCase):
         self.assertIn('Export completed', pop_up_window.text)
 
         # Download button is clickable
+        downloadButtonSelector = ".modal-content .btn-okay" # this one probably doesn't work
+        WebDriverWait(driver, 10).until(e_c.element_to_be_clickable((By.CSS_SELECTOR, downloadButtonSelector)))
+        downloadButton = driver.find_element_by_css_selector(downloadButtonSelector)
+        downloadButton.click()
+
+        downloadDialog = driver.switch_to_alert()
+
+        #adjust file path depending on os
+        pathToDownloadFolder = ""
+        if os.uname().sysname == 'Linux':
+            pathToDownloadFolder = os.path.expanduser("~/Downloads/")
+        else:   
+            pathToDownloadFolder = os.path.expanduser("~user\\Downloads\\")  # CHECK this please
+        
+        pathToFile = pathToDownloadFolder + "document_1.json"
+        downloadDialog.send_keys(pathToFile)
+        downloadDialog.submit()
 
         # File is in ~/Downloads (unix) or user\Downloads (windows)
-        
+        self.assertTrue(os.path.isfile(pathToFile))
 
         # for input_col_name in driver.find_elements_by_xpath("//input[@placeholder='id']"):
         #     print(input_col_name.text)
