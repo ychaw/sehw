@@ -13,7 +13,7 @@ class BasePage(ABC):
     def __init__(self, driver_proxy: DriverProxy):
         self.driver_proxy = driver_proxy
 
-    base_url = "https://sqlify.io"
+    base_url = "https://numidian.io"
 
     @abstractmethod
     def navigate(self):
