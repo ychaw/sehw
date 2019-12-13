@@ -39,18 +39,13 @@ class PythonOrgSearch(unittest.TestCase):
 
 
         # find the text input and replace abc with column
-
-        columnNameFieldLocatorXPATH = "//div[@class='form-field']/input[@placeholder='id']"
-        columnNameFields = driver.find_elements(By.XPATH, columnNameFieldLocatorXPATH)
         
-        for field in columnNameFields:
-            old_text = field.get_attribute("value")
-            print(old_text)
-            self.assertIn('abc_', old_text)
+        for i in range(1, 5):
+            css_selector = "div:nth-child(§) .form-field:nth-child(2) > .input".replace("§", str(i))
+            field = driver.find_element(By.CSS_SELECTOR, css_selector)
             field.clear()
-            field.send_keys(old_text.replace('abc', 'column'))
-
-            updatedText = field.get_attribute("value")
+            field.send_keys("column_" + str(i))
+            updatedText = driver.find_element(By.CSS_SELECTOR, css_selector).get_attribute("value")
             self.assertIn('column_', updatedText) # check if changing the text worked
             self.assertNotIn('abc', updatedText)
 
@@ -76,9 +71,14 @@ class PythonOrgSearch(unittest.TestCase):
         export_file_button = pop_up_window.find_element_by_class_name('btn-primary')
         export_file_button.click()
 
+        # check if "Export completed" is in popup
+
         WebDriverWait(driver, 5).until(e_c.presence_of_element_located((By.CLASS_NAME, 'alert-ok')))
         self.assertIn('Export completed', pop_up_window.text)
 
+        # Download button is clickable
+
+        # File is in ~/Downloads (unix) or user\Downloads (windows)
         
 
         # for input_col_name in driver.find_elements_by_xpath("//input[@placeholder='id']"):
