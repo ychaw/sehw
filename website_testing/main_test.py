@@ -40,27 +40,28 @@ class PythonOrgSearch(unittest.TestCase):
 
         # find the text input and replace abc with column
 
-        fields = driver.find_elements_by_class_name('field')
-        for field in fields:
-            column_name_input = field.find_element_by_xpath("/div[@class='form-field']/input[2]") # doesn't work
-            old_text = column_name_input.text
-            self.assertIn('abc_', old_text) # sometimes doesn't work
-            column_name_input.clear()
-            column_name_input.send_keys(old_text.replace('abc', 'column'))
+        columnNameFieldLocatorXPATH = "//div[@class='form-field']/input[@placeholder='id']"
+        columnNameFields = driver.find_elements(By.XPATH, columnNameFieldLocatorXPATH)
+        
+        for field in columnNameFields:
+            old_text = field.get_attribute("value")
+            print(old_text)
+            self.assertIn('abc_', old_text)
+            field.clear()
+            field.send_keys(old_text.replace('abc', 'column'))
 
-        # check if changing the text worked
-
-        for field in driver.find_elements_by_class_name('field'):
-            column_name = field.find_elements_by_class_name("form-field")[1]
-            text_input = column_name.find_element_by_tag_name("input")
-            self.assertIn('column_', text_input.text)
-            self.assertNotIn('abc', text_input.text)
+            updatedText = field.get_attribute("value")
+            self.assertIn('column_', updatedText) # check if changing the text worked
+            self.assertNotIn('abc', updatedText)
 
         # find the export button
-
-        buttons = driver.find_elements_by_xpath("//*[@class='btn-primary extra-small']") # doesn't work, returns empty
-        for button in buttons:
-            button.click()
+        
+        # I copied this path out of the page with devtools, but it also doesn't work, 
+        # so there must be another issue somewhere
+        # exportButton = driver.find_element_by_xpath("/html/body/div/div/div[2]/header/div[3]/button")
+        
+        exportButton = driver.find_element_by_xpath("//div[@class='text-right']/button") # doesn't find the element
+        exportButton.click()
 
         # wait until the export window is open and visible
 
