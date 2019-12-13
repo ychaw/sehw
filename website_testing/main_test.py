@@ -34,9 +34,10 @@ class PythonOrgSearch(unittest.TestCase):
         upload_button = driver.find_element_by_class_name('btn-primary.big')
         upload_button.click()
 
-        WebDriverWait(driver, 5).until(e_c.presence_of_element_located((By.CLASS_NAME, 'options-header')))
+        WebDriverWait(driver, 10).until(e_c.presence_of_element_located((By.CLASS_NAME, 'options-header')))
         self.assertIn('https://app.numidian.io/convert/', driver.current_url)
 
+        WebDriverWait(driver, 10).until(e_c.presence_of_element_located((By.CLASS_NAME, 'records')))
 
         # find the text input and replace abc with column
         
@@ -73,7 +74,7 @@ class PythonOrgSearch(unittest.TestCase):
 
         # check if "Export completed" is in popup
 
-        WebDriverWait(driver, 5).until(e_c.presence_of_element_located((By.CLASS_NAME, 'alert-ok')))
+        WebDriverWait(driver, 40).until(e_c.presence_of_element_located((By.CSS_SELECTOR, '.alert-ok')))
         self.assertIn('Export completed', pop_up_window.text)
 
         # Download button is clickable
