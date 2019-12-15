@@ -3,6 +3,7 @@ import os
 
 import unittest
 from selenium import webdriver
+from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as e_c
 from selenium.webdriver.common.by import By
@@ -12,7 +13,15 @@ from selenium.webdriver.common.keys import Keys
 class PythonOrgSearch(unittest.TestCase):
 
     def setUp(self):
-        self.driver = webdriver.Firefox()
+        profile = webdriver.FirefoxProfile()
+        profile.set_preference("browser.download.folderList", 2)
+        profile.set_preference("browser.download.dir", os.path.join(os.getcwd(), 'downloads'))
+        # profile.set_preference("browser.download.manager.showWhenStarting", False)
+        # profile.set_preference("browser.helperApps.neverAsk.saveToDisk", "application/json")
+        # profile.set_preference("browser.download.manager.closeWhenDone", False)
+        # profile.set_preference("browser.download.manager.focusWhenStarting", False)
+
+        self.driver = webdriver.Firefox(profile)
 
     def test_search_in_python_org(self):
         driver = self.driver
@@ -23,10 +32,7 @@ class PythonOrgSearch(unittest.TestCase):
         input_file = drop_area.find_element_by_id('file')
 
         #adjust file path depending on os
-        if os.uname().sysname == 'Linux':
-            input_file.send_keys(os.getcwd() + '/data/document_1.csv')
-        else:    
-            input_file.send_keys(os.getcwd() + '\\data\\document_1.csv')
+        input_file.send_keys(os.path.join(os.getcwd(),'data', 'document_1.csv'))
         
         WebDriverWait(driver, 5).until(e_c.text_to_be_present_in_element((By.CLASS_NAME, 'drop-area'), 'document'))
         self.assertIn('document_1.csv', drop_area.text)
@@ -43,15 +49,10 @@ class PythonOrgSearch(unittest.TestCase):
         
         # this sometimes misses the first two inputs, make the selector more explicit
 
-        for i in range(1, 5):
-            
-            css_selector = "div:nth-child(§) .form-field:nth-child(2) > .input".replace("§", str(i))
-            field = driver.find_element(By.CSS_SELECTOR, css_selector)
-            field.clear()
-            field.send_keys("column_" + str(i))
-            updatedText = driver.find_element(By.CSS_SELECTOR, css_selector).get_attribute("value")
-            self.assertIn('column_', updatedText) # check if changing the text worked
-            self.assertNotIn('abc', updatedText)
+        for input_col_name in driver.find_elements_by_xpath("//input[@placeholder='id']"):
+            new_text = input_col_name.get_attribute('value').replace('abc', 'column')
+            input_col_name.clear()
+            input_col_name.send_keys(new_text)
         
         # find and click export button
 
@@ -76,30 +77,35 @@ class PythonOrgSearch(unittest.TestCase):
         WebDriverWait(driver, 40).until(e_c.presence_of_element_located((By.CSS_SELECTOR, '.alert-ok')))
         self.assertIn('Export completed', pop_up_window.text)
 
-        # Download button is clickable
-        downloadButtonSelector = ".modal-content .btn-okay" # this one probably doesn't work
-        WebDriverWait(driver, 10).until(e_c.element_to_be_clickable((By.CSS_SELECTOR, downloadButtonSelector)))
-        downloadButton = driver.find_element_by_css_selector(downloadButtonSelector)
-        downloadButton.click()
-
-        downloadDialog = driver.switch_to_alert()
-
-        #adjust file path depending on os
-        pathToDownloadFolder = ""
-        if os.uname().sysname == 'Linux':
-            pathToDownloadFolder = os.path.expanduser("~/Downloads/")
-        else:   
-            pathToDownloadFolder = os.path.expanduser("~user\\Downloads\\")  # CHECK this please
         
-        pathToFile = pathToDownloadFolder + "document_1.json"
-        downloadDialog.send_keys(pathToFile)
-        downloadDialog.submit()
+        path_to_downloaded_file = os.path.join(os.getcwd(), 'downloads')
+        list_of_jsons = [os.path.join(path_to_downloaded_file, f) for f in os.listdir(path_to_downloaded_file) if f.endswith('.json')]
 
-        # File is in ~/Downloads (unix) or user\Downloads (windows)
-        self.assertTrue(os.path.isfile(pathToFile))
+        # Download button is clickable
+        download_button_xpath = "//span[@class='margin-left-auto']/a"
+        WebDriverWait(driver, 10).until(e_c.element_to_be_clickable((By.XPATH, download_button_xpath)))
+        download_button = driver.find_element_by_xpath(download_button_xpath)
+        download_button.click()
 
-        # for input_col_name in driver.find_elements_by_xpath("//input[@placeholder='id']"):
-        #     print(input_col_name.text)
+
+        # SAVE FILE MANUALLY
+
+        # neither selenium alerts or firefox profile preferences are working for me
+
+
+        # File is in Download Folder
+        new_list_of_jsons = [os.path.join(path_to_downloaded_file, f) for f in os.listdir(path_to_downloaded_file) if f.endswith('.json')]
+        self.assertTrue(len(list_of_jsons) != len(new_list_of_jsons))
+
+        json_file = open([d for d in new_list_of_jsons if d not in list_of_jsons][0])
+        csv_file = open(os.path.join(os.getcwd(),'data', 'document_1.csv'))
+        json_file = open([d for d in new_list_of_jsons][0])
+        print()
+        print(csv_file.read())
+        print()
+        print(json_file.read())
+        print()
+
 
     def tearDown(self):
         self.driver.close()
