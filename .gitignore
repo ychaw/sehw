@@ -1,2 +1,5 @@
 website_testing/.idea/**
 website_testing/venv/**
+.vscode/.ropeproject/config.py
+.vscode/.ropeproject/objectdb
+website_testing/geckodriver.log
