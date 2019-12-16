@@ -24,11 +24,18 @@ class FileConversion(SeleniumTestCase):
         self.start_page.navigate()
 
     def test_file_conversion(self):
+        test_documents=['document_1.csv', 'document_2.csv']
+        for f in test_documents:
+            self.conversion_journey(f)
+
+    def conversion_journey(self, test_file):
+        
+        self.start_page.navigate()
 
         #adjust file path depending on os
-        csv_file_path = os.path.join(os.getcwd(),'assets', 'document_1.csv')
+        csv_file_path = os.path.join(os.getcwd(),'assets', test_file)
         self.start_page.upload_file(csv_file_path)
-        self.assertIn('document_1.csv', self.start_page.get_drop_area().text)
+        self.assertIn(test_file, self.start_page.get_drop_area().text)
 
         self.start_page.click_upload_button()
         self.assertIn('https://app.numidian.io/convert/', self.start_page.driver_proxy.driver.current_url)
@@ -52,8 +59,6 @@ class FileConversion(SeleniumTestCase):
         self.convert_page.wait_for_export()
         self.assertIn('Export completed', self.convert_page.get_pop_up().text)
 
-        
-        # path_to_downloaded_file = os.path.join(os.getcwd(), 'downloads')
         path_to_downloaded_file = os.path.join(os.path.expanduser("~"), "Downloads")
         list_of_jsons = [os.path.join(path_to_downloaded_file, f) for f in os.listdir(path_to_downloaded_file) if f.endswith('.json')]
 
@@ -69,12 +74,13 @@ class FileConversion(SeleniumTestCase):
         new_list_of_jsons = [os.path.join(path_to_downloaded_file, f) for f in os.listdir(path_to_downloaded_file) if f.endswith('.json')]
         self.assertTrue(len(list_of_jsons) != len(new_list_of_jsons))
 
-        json_file = open([d for d in new_list_of_jsons if d not in list_of_jsons][0])
+        # Get the new json file we just downloaded
+        jsons_to_test_against = [f for f in filter(lambda el: el not in list_of_jsons, new_list_of_jsons)]
+        
         csv_file = open(csv_file_path)
-        json_file = open([d for d in new_list_of_jsons][0])
+        json_file = open(jsons_to_test_against[0])
 
         self.compare_json_to_csv(json_file, csv_file)
-
 
 
     def compare_json_to_csv(self, json_file, csv_file):
