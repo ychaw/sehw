@@ -82,6 +82,9 @@ class FileConversion(SeleniumTestCase):
 
         self.compare_json_to_csv(json_file, csv_file)
 
+        csv_file.close()
+        json_file.close()
+
 
     def compare_json_to_csv(self, json_file, csv_file):
 
