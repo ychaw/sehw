@@ -1,5 +1,11 @@
 website_testing/.idea/**
+
 website_testing/venv/**
-website_testing/geckodriver.log
 .vscode/.ropeproject/config.py
 .vscode/.ropeproject/objectdb
+
+website_testing/__pycache__/**
+website_testing/locators/__pycache__/**
+website_testing/page_objects/__pycache__/**
+website_testing/selenium_utils/__pycache__/**
+website_testing/geckodriver.log

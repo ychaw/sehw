@@ -5,7 +5,7 @@ from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 
 from website_testing.config import config
-from website_testing.selenium.selenium_utils import selenium_config
+from website_testing.selenium_utils import selenium_config
 
 
 class DriverProxy:
@@ -34,6 +34,11 @@ class DriverProxy:
         if self.browser_type == selenium_config.SeleniumBrowser.FIREFOX_BROWSER:
             # get path of driver file
             fire_fox_driver_path = self.TEST_DIRCTORY + "/driver_files/geckodriver.exe"
+
+            # adjust if linux
+            if os.uname().sysname == 'Linux':
+                fire_fox_driver_path = self.TEST_DIRCTORY + "/driver_files/geckodriver"
+
             # Set some options for driver
             options = FirefoxOptions()
             options.add_argument("--disable-dev-shm-usage")  # overcome limited resource problems
@@ -52,6 +57,10 @@ class DriverProxy:
         elif self.browser_type == selenium_config.SeleniumBrowser.CHROME_BROWSER:
             # get path of driver file
             chrome_driver_path = self.TEST_DIRCTORY + "/driver_files/chromedriver.exe"
+
+            # adjust if linux
+            if os.uname().sysname == 'Linux':
+                chrome_driver_path = self.TEST_DIRCTORY + "/driver_files/chromedriver"
 
             # Set some options for driver
             options = ChromeOptions()
